@@ -3,6 +3,11 @@ Write-Host "Importing Powershell Module" -ForegroundColor DarkCyan
 Get-Module -ListAvailable Vmware* |Import-Module -Verbose
 ## Start-Trascript For Host Record ## 
 Write-Host "Peforming Transcript For Console record"
+# Connect vcenter
+$cred = Get-Credential
+$vc = Read-Host " Provide vCenter Server Name "
+Write-Host " Connectiong $vc Server "
+Connect-VIServer $vc -Credential $cred
 Start-Transcript
 ## Import CSV ##
 Write-Host "Importing CSV" -ForegroundColor DarkCyan
@@ -25,6 +30,16 @@ Stop-VMGuest -VM $vm -Confirm:$false
 ## Sleep Mode ##
 Write-Host "Starting Sleep Mode For30 Sec" -BackgroundColor Cyan
 Start-Sleep -Seconds 30
+$vm = get-vm $vmname
+if ($vm.PowerState -eq "PoweredOn")
+{
+## Performing Force Shutdown VM
+Write-Host "Performing Force Shutdown $VM"
+Stop-VM -VM $vm -Confirm:$false
+Write-Host "Starting Sleep Mode For30 Sec" -BackgroundColor Cyan
+Start-Sleep -Seconds 30
+}
+
 ## Performing  $vm Migration Of VM to Another VMhostCluster ##
 Write-Host "Performing $VM Migration Another VMCluster" -BackgroundColor DarkCyan
 $cluster = Get-Cluster -Name $hostcluster
